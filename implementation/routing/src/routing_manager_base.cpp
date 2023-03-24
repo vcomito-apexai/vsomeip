@@ -1399,6 +1399,12 @@ bool routing_manager_base::insert_subscription(
         if (its_event) {
             is_inserted = its_event->add_subscriber(_eventgroup, _filter, _client,
                     host_->is_routing());
+            VSOMEIP_INFO << "APEX: INSERTING SINGLE EVENT SUBSCRIPTION"
+                         << std::hex << std::setw(4) << std::setfill('0') << _client <<"): ["
+                         << std::hex << std::setw(4) << std::setfill('0') << _service << "."
+                         << std::hex << std::setw(4) << std::setfill('0') << _instance << "."
+                         << std::hex << std::setw(4) << std::setfill('0') << _eventgroup << ":"
+                         << std::hex << std::setw(4) << std::setfill('0') << _event << "]";
         } else {
             VSOMEIP_WARNING << "routing_manager_base::insert_subscription("
                 << std::hex << std::setfill('0')
@@ -1414,6 +1420,14 @@ bool routing_manager_base::insert_subscription(
                     _instance, _eventgroup, _event, _filter, _client);
         }
     } else { // subscribe to all events of the eventgroup
+
+        VSOMEIP_INFO << "APEX: INSERTING EVENTGROUP"
+                     << std::hex << std::setw(4) << std::setfill('0') << _client <<"): ["
+                     << std::hex << std::setw(4) << std::setfill('0') << _service << "."
+                     << std::hex << std::setw(4) << std::setfill('0') << _instance << "."
+                     << std::hex << std::setw(4) << std::setfill('0') << _eventgroup << ":"
+                     << std::hex << std::setw(4) << std::setfill('0') << _event << "]";
+
         std::shared_ptr<eventgroupinfo> its_eventgroup
             = find_eventgroup(_service, _instance, _eventgroup);
         bool create_place_holder(false);
