@@ -161,12 +161,8 @@ add_definitions(-DVSOMEIP_INTERNAL_SUPPRESS_DEPRECATED)
 find_package(Threads REQUIRED)
 
 # Boost
-find_package( Boost 1.55 COMPONENTS system thread filesystem REQUIRED )
-if(${CMAKE_SYSTEM_NAME} MATCHES "QNX")
-    include_directories(${Boost_INCLUDE_DIR} )
-else()
-    include_directories(SYSTEM ${Boost_INCLUDE_DIR} )
-endif()
+find_package( Boost 1.71 COMPONENTS system thread filesystem REQUIRED )
+include_directories(${Boost_INCLUDE_DIRS})
 
 if(Boost_FOUND)
   if(Boost_LIBRARY_DIR)
@@ -251,11 +247,31 @@ if (MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS -D_WINSOCK_DEPRECATED_NO_WARNINGS -D_WIN32_WINNT=${BOOST_WINDOWS_VERSION} -DWIN32 -DBOOST_ASIO_DISABLE_IOCP /EHsc /std:c++14 /wd4250")
     set(USE_RT "")
     link_directories(${Boost_LIBRARY_DIR_DEBUG})
-elseif(${CMAKE_SYSTEM_NAME} MATCHES "QNX")
-    set(USE_RT "")
 else()
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OS_CXX_FLAGS} -g ${OPTIMIZE} -std=c++14 ${NO_DEPRECATED} ${EXPORTSYMBOLS}")
+    ################################################################################
+    # Apex.AI additions
+    ################################################################################
+    if (CMAKE_BUILD_TYPE STREQUAL "Release")
+      # Remove -g flag on Release builds, to remove debug_symbols
+      set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OS_CXX_FLAGS} ${OPTIMIZE} -std=c++14 ${NO_DEPRECATED} ${EXPORTSYMBOLS}")
+    else()
+      set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OS_CXX_FLAGS} -g ${OPTIMIZE} -std=c++14 ${NO_DEPRECATED} ${EXPORTSYMBOLS}")
+    endif()
     set(USE_RT "rt")
+endif()
+
+
+################################################################################
+# Apex.AI additions
+################################################################################
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-overloaded-virtual")
+endif()
+
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
+    add_definitions(-DBOOST_ASIO_DISABLE_STRING_VIEW)
+    set (VSOMEIP_BASE_PATH "/var")
+    set(USE_RT "")
 endif()
 
 ################################################################################
@@ -304,7 +320,7 @@ add_library(${VSOMEIP_NAME} SHARED ${${VSOMEIP_NAME}_SRC})
 set_target_properties (${VSOMEIP_NAME} PROPERTIES VERSION ${VSOMEIP_VERSION} SOVERSION ${VSOMEIP_MAJOR_VERSION})
 if (MSVC)
     set_target_properties(${VSOMEIP_NAME} PROPERTIES COMPILE_DEFINITIONS "VSOMEIP_DLL_COMPILATION")
-else ()
+elseif (NOT "${CMAKE_SYSTEM_NAME}" STREQUAL "QNX")
     set_target_properties(${VSOMEIP_NAME} PROPERTIES LINK_FLAGS "-Wl,-wrap,socket -Wl,-wrap,accept -Wl,-wrap,open")
 endif ()
 target_include_directories(${VSOMEIP_NAME} INTERFACE
@@ -450,10 +466,10 @@ message(STATUS "Default configuration folder: ${DEFAULT_CONFIGURATION_FOLDER}")
 set(DEFAULT_CONFIGURATION_FILE "/etc/vsomeip.json" CACHE FILEPATH "Default configuration file")
 message(STATUS "Default configuration file: ${DEFAULT_CONFIGURATION_FILE}")
 
-message("Predefined base path: ${VSOMEIP_BASE_PATH}")
-message("Predefined unicast address: ${VSOMEIP_UNICAST_ADDRESS}")
-message("Predefined diagnosis address: ${VSOMEIP_DIAGNOSIS_ADDRESS}")
-message("Predefined wait times for internal communication ports (TCP):\
+message(STATUS "Predefined base path: ${VSOMEIP_BASE_PATH}")
+message(STATUS "Predefined unicast address: ${VSOMEIP_UNICAST_ADDRESS}")
+message(STATUS "Predefined diagnosis address: ${VSOMEIP_DIAGNOSIS_ADDRESS}")
+message(STATUS "Predefined wait times for internal communication ports (TCP):\
  ${VSOMEIP_LOCAL_TCP_PORT_WAIT_TIME}\
  (max=${VSOMEIP_LOCAL_TCP_PORT_MAX_WAIT_TIME})")
 
@@ -577,10 +593,8 @@ install (
 ##############################################################################
 add_custom_target(doc)
 
-find_package(Doxygen)
-if (NOT DOXYGEN_FOUND)
-    message(WARNING "Doxygen is not installed. Documentation can not be built.")
-else()
+find_package(Doxygen QUIET)
+if (DOXYGEN_FOUND)
     # set configuration variables for doxygen.in
     set(PROJECT "vsomeip")
     set(DOCDIR documentation)
@@ -615,13 +629,9 @@ else()
     add_dependencies(doc doxygen-doc)
 endif()
 
-find_program(ASCIIDOC_PATH asciidoc)
-find_program(SOURCE_HIGHLIGHT_PATH source-highlight)
-if ("${ASCIIDOC_PATH}" STREQUAL "ASCIIDOC_PATH-NOTFOUND")
-    message(WARNING "asciidoc is not installed. Readme can not be built.")
-elseif("${SOURCE_HIGHLIGHT_PATH}" STREQUAL "SOURCE_HIGHLIGHT_PATH-NOTFOUND")
-    message(WARNING "source-highlight is not installed. Readme can not be built.")
-else()
+find_program(ASCIIDOC_PATH asciidoc QUIET)
+find_program(SOURCE_HIGHLIGHT_PATH source-highlight QUIET)
+if (NOT ("${ASCIIDOC_PATH}" STREQUAL "ASCIIDOC_PATH-NOTFOUND" OR "${SOURCE_HIGHLIGHT_PATH}" STREQUAL "SOURCE_HIGHLIGHT_PATH-NOTFOUND"))
     message("asciidoc found")
     message("source-highlight found")
     add_custom_command(TARGET doc
