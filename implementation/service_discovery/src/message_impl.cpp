@@ -428,7 +428,7 @@ gid_t message_impl::get_gid() const {
 
 vsomeip_sec_client_t message_impl::get_sec_client() const {
     static vsomeip_sec_client_t its_dummy_sec_client{
-        VSOMEIP_CLIENT_UDS, {vsomeip_sec_uds_client_credentials_t{ANY_UID, ANY_GID}}
+        VSOMEIP_CLIENT_UDS, {vsomeip_sec_uds_client_credentials_t{static_cast<uid_t>(ANY_UID), static_cast<gid_t>(ANY_GID)}}
     };
 
     return (its_dummy_sec_client);

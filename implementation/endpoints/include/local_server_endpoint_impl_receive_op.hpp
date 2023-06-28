@@ -7,7 +7,7 @@
 #define VSOMEIP_V3_LOCAL_SERVER_ENDPOINT_IMPL_RECEIVE_OP_HPP_
 
 #if VSOMEIP_BOOST_VERSION >= 106600
-#if defined(__linux__) || defined(ANDROID)
+#if defined(__linux__) || defined(ANDROID) || defined(__QNX__)
 
 #include <boost/asio/local/stream_protocol.hpp>
 
@@ -43,6 +43,7 @@ struct local_server_endpoint_impl_receive_op {
                 its_vec[0].iov_base = buffer_;
                 its_vec[0].iov_len = length_;
 
+#if !defined(__QNX__)
                 union {
                     struct cmsghdr cmh;
                     char   control[CMSG_SPACE(sizeof(struct ucred))];
@@ -52,13 +53,16 @@ struct local_server_endpoint_impl_receive_op {
                 control_un.cmh.cmsg_len = CMSG_LEN(sizeof(struct ucred));
                 control_un.cmh.cmsg_level = SOL_SOCKET;
                 control_un.cmh.cmsg_type = SCM_CREDENTIALS;
+#endif
 
                 // Build header with all informations to call ::recvmsg
                 msghdr its_header = msghdr();
                 its_header.msg_iov = its_vec;
                 its_header.msg_iovlen = 1;
+#if !defined(__QNX__)
                 its_header.msg_control = control_un.control;
                 its_header.msg_controllen = sizeof(control_un.control);
+#endif
 
                 // Call recvmsg and handle its result
                 errno = 0;
@@ -82,6 +86,7 @@ struct local_server_endpoint_impl_receive_op {
                 if (bytes_ == 0)
                     _error = boost::asio::error::eof;
 
+#if !defined(__QNX__)
                 // Extract credentials (UID/GID)
                 struct ucred *its_credentials;
                 for (struct cmsghdr *cmsg = CMSG_FIRSTHDR(&its_header);
@@ -100,6 +105,7 @@ struct local_server_endpoint_impl_receive_op {
                         }
                     }
                 }
+#endif
 
                 break;
             }

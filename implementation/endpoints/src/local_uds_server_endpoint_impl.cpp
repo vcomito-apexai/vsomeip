@@ -67,7 +67,9 @@ local_uds_server_endpoint_impl::local_uds_server_endpoint_impl(
             static_cast<mode_t>(_configuration->get_permissions_uds())) == -1) {
         VSOMEIP_ERROR << __func__ << ": chmod: " << strerror(errno);
     }
+#if !defined(__QNX__)
     credentials::activate_credentials(acceptor_.native_handle());
+#endif
 }
 
 local_uds_server_endpoint_impl::local_uds_server_endpoint_impl(
@@ -96,7 +98,9 @@ local_uds_server_endpoint_impl::local_uds_server_endpoint_impl(
             static_cast<mode_t>(_configuration->get_permissions_uds())) == -1) {
        VSOMEIP_ERROR << __func__ << ": chmod: " << strerror(errno);
     }
+#if !defined(__QNX__)
     credentials::activate_credentials(acceptor_.native_handle());
+#endif
 }
 
 local_uds_server_endpoint_impl::~local_uds_server_endpoint_impl() {
@@ -284,6 +288,7 @@ void local_uds_server_endpoint_impl::accept_cbk(
         its_sec_client.client.uds_client.group = ANY_GID;
 
         socket_type &its_socket = _connection->get_socket();
+#if !defined(__QNX__)
         if (auto creds = credentials::receive_credentials(its_socket.native_handle())) {
 
             its_client = std::get<0>(*creds);
@@ -299,6 +304,7 @@ void local_uds_server_endpoint_impl::accept_cbk(
             its_socket.close(er);
             return;
         }
+#endif
 
         if (its_host && configuration_->is_security_enabled()) {
             if (!configuration_->check_routing_credentials(its_client, &its_sec_client)) {
@@ -482,8 +488,8 @@ void local_uds_server_endpoint_impl::connection::start() {
             ),
             &recv_buffer_[recv_buffer_size_],
             left_buffer_size,
-            std::numeric_limits<uint32_t>::max(),
-            std::numeric_limits<uint32_t>::max(),
+            static_cast<uid_t>(std::numeric_limits<uint32_t>::max()),
+            static_cast<gid_t>(std::numeric_limits<uint32_t>::max()),
             std::numeric_limits<size_t>::min()
         };
         socket_.async_wait(socket_type::wait_read, its_operation);

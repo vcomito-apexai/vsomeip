@@ -6,6 +6,8 @@
 #ifndef VSOMEIP_V3_ENDPOINTS_INCLUDE_CREDENTIALS_HPP_
 #define VSOMEIP_V3_ENDPOINTS_INCLUDE_CREDENTIALS_HPP_
 
+#if defined(__linux__) || defined(ANDROID)
+
 #include <tuple>
 
 #include <boost/optional.hpp>
@@ -27,5 +29,7 @@ public:
 };
 
 } // namespace vsomeip_v3
+
+#endif
 
 #endif // VSOMEIP_V3_ENDPOINTS_INCLUDE_CREDENTIALS_HPP_

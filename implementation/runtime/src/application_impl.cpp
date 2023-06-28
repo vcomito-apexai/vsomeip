@@ -396,7 +396,7 @@ void application_impl::start() {
         VSOMEIP_INFO << "Starting vsomeip application \"" << name_ << "\" ("
                 << std::hex << std::setw(4) << std::setfill('0') << client_
                 << ") using "  << std::dec << io_thread_count << " threads"
-#if defined(__linux__) || defined(ANDROID)
+#if defined(__linux__) || defined(ANDROID) || defined(__QNX__)
                 << " I/O nice " << io_thread_nice_level
 #endif
         ;
@@ -1045,8 +1045,8 @@ void application_impl::register_subscription_handler(service_t _service,
         const std::string& _env,
         bool _is_subscribed
     ){
-        uid_t its_uid{ANY_UID};
-        gid_t its_gid{ANY_GID};
+        uid_t its_uid{static_cast<uid_t>(ANY_UID)};
+        gid_t its_gid{static_cast<gid_t>(ANY_GID)};
 
         if (_sec_client && _sec_client->client_type == VSOMEIP_CLIENT_UDS) {
             its_uid = _sec_client->client.uds_client.user;
@@ -2602,8 +2602,8 @@ void application_impl::register_async_subscription_handler(service_t _service,
         bool _is_subscribed,
         const std::function<void(bool)> &_cb
     ){
-        uid_t its_uid{ANY_UID};
-        gid_t its_gid{ANY_GID};
+        uid_t its_uid{static_cast<uid_t>(ANY_UID)};
+        gid_t its_gid{static_cast<gid_t>(ANY_GID)};
 
         if (_sec_client && _sec_client->client_type == VSOMEIP_CLIENT_UDS) {
             its_uid = _sec_client->client.uds_client.user;
