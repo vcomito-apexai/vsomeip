@@ -40,6 +40,7 @@ public:
     static std::shared_ptr<policy_manager_impl> get();
 
     policy_manager_impl();
+    virtual ~policy_manager_impl();
 
 #ifndef VSOMEIP_DISABLE_SECURITY
     // policy_manager interface

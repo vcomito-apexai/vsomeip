@@ -91,6 +91,7 @@ cc_library(
         ],
         exclude = [
             "utility/src/wrappers.cpp",
+            "utility/src/wrappers_qnx.cpp",
         ],
     ),
     hdrs = glob(
@@ -116,6 +117,7 @@ cc_library(
             # since CLOEXEC is not immediately necessary for our use-case, disable the wrappers for now
             #"-Wl,-wrap,socket",
             #"-Wl,-wrap,accept",
+            #"-Wl,-wrap,open",
         ],
         "//conditions:default": [],
     }),
