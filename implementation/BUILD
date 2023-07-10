@@ -57,7 +57,6 @@ cc_library(
         ":implementation",
         "@boost//:filesystem",
     ],
-    alwayslink = True,
 )
 
 cc_library(
@@ -71,7 +70,6 @@ cc_library(
     deps = [
         ":implementation",
     ],
-    alwayslink = True,
 )
 
 cc_library(
@@ -125,5 +123,4 @@ cc_library(
         ":helper",
         "//interface",
     ],
-    alwayslink = True,
 )

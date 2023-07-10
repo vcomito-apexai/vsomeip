@@ -1,33 +1,40 @@
-cc_binary(
-    name = "libvsomeip3.so",
-    linkopts = ["-Wl,--no-undefined"],
-    linkshared = True,
-    linkstatic = True,
+cc_shared_library(
+    name = "vsomeip3_shared",
+    shared_lib_name = "libvsomeip3.so",
     tags = ["same-ros-pkg-as: vsomeip3"],
+    #user_link_flags = [
+    #    "-Wl,--no-undefined",
+    #],
     deps = [
         "//implementation",
     ],
 )
 
-cc_binary(
-    name = "libvsomeip3-cfg.so.3",
-    linkopts = ["-Wl,--no-undefined"],
-    linkshared = True,
-    linkstatic = True,
+cc_shared_library(
+    name = "vsomeip3_config_plugin",
+    dynamic_deps = [
+        ":vsomeip3_shared",
+    ],
+    shared_lib_name = "libvsomeip3-cfg.so.3",
     tags = ["same-ros-pkg-as: vsomeip3"],
-    visibility = ["//visibility:public"],
+    #user_link_flags = [
+    #    "-Wl,--no-undefined",
+    #],
     deps = [
         "//implementation:configuration",
     ],
 )
 
-cc_binary(
-    name = "libvsomeip3-sd.so.3",
-    linkopts = ["-Wl,--no-undefined"],
-    linkshared = True,
-    linkstatic = True,
+cc_shared_library(
+    name = "vsomeip3_sd_plugin",
+    dynamic_deps = [
+        ":vsomeip3_shared",
+    ],
+    shared_lib_name = "libvsomeip3-sd.so.3",
     tags = ["same-ros-pkg-as: vsomeip3"],
-    visibility = ["//visibility:public"],
+    #user_link_flags = [
+    #    "-Wl,--no-undefined",
+    #],
     deps = [
         "//implementation:service_discovery",
     ],
@@ -35,19 +42,23 @@ cc_binary(
 
 cc_import(
     name = "vsomeip3_import",
-    shared_library = ":libvsomeip3.so",
+    shared_library = ":vsomeip3_shared",
     tags = ["same-ros-pkg-as: vsomeip3"],
-    deps = ["//interface"],
+    deps = [
+        "//interface",
+    ],
 )
 
 # interface library, use this target to depend on vsomeip
 cc_library(
     name = "vsomeip3",
     data = [
-        "libvsomeip3-cfg.so.3",
-        "libvsomeip3-sd.so.3",
+        ":vsomeip3_config_plugin",
+        ":vsomeip3_sd_plugin",
     ],
     linkstatic = True,  # no object files
     visibility = ["//visibility:public"],
-    deps = [":vsomeip3_import"],
+    deps = [
+        ":vsomeip3_import",
+    ],
 )
