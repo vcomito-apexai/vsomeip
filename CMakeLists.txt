@@ -150,7 +150,7 @@ find_package(Threads REQUIRED)
 
 # Boost
 find_package( Boost 1.71 COMPONENTS system thread filesystem REQUIRED )
-include_directories(SYSTEM ${Boost_INCLUDE_DIR} )
+include_directories(${Boost_INCLUDE_DIRS})
 
 if(Boost_FOUND)
   if(Boost_LIBRARY_DIR)
