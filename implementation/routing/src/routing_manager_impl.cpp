@@ -10,7 +10,7 @@
 #include <forward_list>
 #include <thread>
 
-#if defined(__linux__) || defined(ANDROID)
+#if defined(__linux__) || defined(ANDROID) || defined(__QNX__)
 #include <unistd.h>
 #include <cstdio>
 #include <time.h>
@@ -251,7 +251,7 @@ void routing_manager_impl::start() {
         version_log_timer_.async_wait(std::bind(&routing_manager_impl::log_version_timer_cbk,
                 this, std::placeholders::_1));
     }
-#if defined(__linux__) || defined(ANDROID)
+#if defined(__linux__) || defined(ANDROID) || defined(__QNX__)
     if (configuration_->log_memory()) {
         std::lock_guard<std::mutex> its_lock(memory_log_timer_mutex_);
         boost::system::error_code ec;
@@ -305,12 +305,14 @@ void routing_manager_impl::stop() {
         std::lock_guard<std::mutex> its_lock(version_log_timer_mutex_);
         version_log_timer_.cancel();
     }
-#if defined(__linux__) || defined(ANDROID)
+#if defined(__linux__) || defined(ANDROID) || defined(__QNX__)
     {
         boost::system::error_code ec;
         std::lock_guard<std::mutex> its_lock(memory_log_timer_mutex_);
         memory_log_timer_.cancel(ec);
     }
+#endif
+#if defined(__linux__) || defined(ANDROID)
     if (netlink_connector_) {
         netlink_connector_->stop();
     }

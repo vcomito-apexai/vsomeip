@@ -3,7 +3,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#if defined(__linux__) || defined(ANDROID)
+#if defined(__linux__) || defined(ANDROID) || defined(__QNX__)
 #include <unistd.h>
 #endif
 
@@ -1626,7 +1626,7 @@ void routing_manager_client::on_message(
                     auto its_policy = its_command.get_policy();
                     uint32_t its_uid;
                     uint32_t its_gid;
-                    if (its_policy->get_uid_gid(its_uid, its_gid)) {
+                    if (its_policy->get_uid_gid(reinterpret_cast<uid_t&>(its_uid), reinterpret_cast<gid_t&>(its_gid))) {
                         if (is_internal_policy_update
                                 || its_security->is_policy_update_allowed(its_uid, its_policy)) {
                             its_security->update_security_policy(its_uid, its_gid, its_policy);
@@ -2809,7 +2809,7 @@ void routing_manager_client::on_update_security_credentials(
 
     for (const auto &c : _command.get_credentials()) {
         std::shared_ptr<policy> its_policy(std::make_shared<policy>());
-        boost::icl::interval_set<uint32_t> its_gid_set;
+        boost::icl::interval_set<gid_t> its_gid_set;
         uid_t its_uid(c.first);
         gid_t its_gid(c.second);
 

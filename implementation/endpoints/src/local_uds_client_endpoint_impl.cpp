@@ -127,11 +127,13 @@ void local_uds_client_endpoint_impl::connect() {
 
             // Credentials
             if (!its_connect_error) {
+#if !defined(__QNX__)
                 auto its_host = endpoint_host_.lock();
                 if (its_host) {
                     credentials::send_credentials(socket_->native_handle(),
                             its_host->get_client(), its_host->get_client_host());
                 }
+#endif
             } else {
                 VSOMEIP_WARNING << "local_client_endpoint::connect: Couldn't "
                         << "connect to: " << remote_.path() << " ("

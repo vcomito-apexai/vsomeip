@@ -654,7 +654,7 @@ void server_endpoint_impl<Protocol>::send_cbk(
             } else { // all messages of the to be stopped service have been sent
                 auto handler = stp_hndlr_iter->second;
                 auto ptr = this->shared_from_this();
-#if defined(__linux__) || defined(ANDROID)
+#if defined(__linux__) || defined(ANDROID) || defined(__QNX__)
                 endpoint_impl<Protocol>::
 #endif
                     io_.post([ptr, handler, its_stopped_service](){
@@ -679,7 +679,7 @@ void server_endpoint_impl<Protocol>::send_cbk(
             if (found_cbk != prepare_stop_handlers_.end()) {
                 auto handler = found_cbk->second;
                 auto ptr = this->shared_from_this();
-#if defined(__linux__) || defined(ANDROID)
+#if defined(__linux__) || defined(ANDROID) || defined(__QNX__)
                 endpoint_impl<Protocol>::
 #endif
                     io_.post([ptr, handler](){
@@ -810,7 +810,7 @@ void server_endpoint_impl<Protocol>::start_dispatch_timer(
         its_offset = std::chrono::nanoseconds::zero();
     }
 
-#if defined(__linux__) || defined(ANDROID)
+#if defined(__linux__) || defined(ANDROID) || defined(__QNX__)
     its_data.dispatch_timer_->expires_from_now(its_offset);
 #else
     its_data.dispatch_timer_->expires_from_now(
@@ -839,7 +839,7 @@ void server_endpoint_impl<Protocol>::update_last_departure(
 }
 
 // Instantiate template
-#if defined(__linux__) || defined(ANDROID)
+#if defined(__linux__) || defined(ANDROID) || defined(__QNX__)
 #if VSOMEIP_BOOST_VERSION < 106600
 template class server_endpoint_impl<boost::asio::local::stream_protocol_ext>;
 template class server_endpoint_impl<boost::asio::ip::udp_ext>;

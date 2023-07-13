@@ -7,9 +7,12 @@
 #define VSOMEIP_V3_UDP_SERVER_ENDPOINT_IMPL_RECEIVE_OP_HPP_
 
 #if VSOMEIP_BOOST_VERSION >= 106600
-#if defined(__linux__) || defined(ANDROID)
+#if defined(__linux__) || defined(ANDROID) || defined(__QNX__)
 
 #include <iomanip>
+#ifdef __QNX__
+#include <vector>
+#endif
 
 #include <boost/asio/ip/udp.hpp>
 
@@ -34,6 +37,10 @@ struct udp_server_endpoint_impl_receive_op {
     bool is_v4_;
     boost::asio::ip::address destination_;
     size_t bytes_;
+#ifdef __QNX__
+    std::vector<char> control_v4_buf{CMSG_SPACE(sizeof(struct in_pktinfo)), 0};
+    std::vector<char> control_v6_buf{CMSG_SPACE(sizeof(struct in6_pktinfo)), 0};
+#endif
 
     void operator()(boost::system::error_code _error) {
 
@@ -66,6 +73,12 @@ struct udp_server_endpoint_impl_receive_op {
                     struct sockaddr_in6 v6;
                 } addr;
 
+#ifdef __QNX__
+                void * control_v4_ptr = control_v4_buf.data();
+                size_t control_v4_len = control_v4_buf.size();
+                void * control_v6_ptr = control_v6_buf.data();
+                size_t control_v6_len = control_v6_buf.size();
+#else
                 union {
                     struct cmsghdr cmh;
                     union {
@@ -73,20 +86,25 @@ struct udp_server_endpoint_impl_receive_op {
                         char   v6[CMSG_SPACE(sizeof(struct in6_pktinfo))];
                     } control;
                 } control_un;
+                void * control_v4_ptr = control_un.control.v4;
+                size_t control_v4_len = sizeof(control_un.control.v4);
+                void * control_v6_ptr = control_un.control.v6;
+                size_t control_v6_len = sizeof(control_un.control.v6);
+#endif
 
                 // Prepare
                 if (is_v4_) {
                     its_header.msg_name = &addr;
                     its_header.msg_namelen = sizeof(sockaddr_in);
 
-                    its_header.msg_control = control_un.control.v4;
-                    its_header.msg_controllen = sizeof(control_un.control.v4);
+                    its_header.msg_control = control_v4_ptr;
+                    its_header.msg_controllen = control_v4_len;
                 } else {
                     its_header.msg_name = &addr;
                     its_header.msg_namelen = sizeof(sockaddr_in6);
 
-                    its_header.msg_control = control_un.control.v6;
-                    its_header.msg_controllen = sizeof(control_un.control.v6);
+                    its_header.msg_control = control_v6_ptr;
+                    its_header.msg_controllen = control_v6_len;
                 }
 
                 // Call recvmsg and handle its result

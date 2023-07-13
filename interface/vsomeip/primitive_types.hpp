@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <string>
 
-#if defined(__linux__) || defined(ANDROID)
+#if defined(__linux__) || defined(ANDROID) || defined(__QNX__)
 #include <sys/types.h>
 #endif
 

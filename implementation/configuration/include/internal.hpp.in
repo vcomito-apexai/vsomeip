@@ -13,6 +13,14 @@
 #include <vsomeip/primitive_types.hpp>
 #include <vsomeip/structured_types.hpp>
 
+#ifndef VSOMEIP_VERSION
+#if @VSOMEIP_HOTFIX_VERSION@ == 0
+#define VSOMEIP_VERSION "@VSOMEIP_MAJOR_VERSION@.@VSOMEIP_MINOR_VERSION@.@VSOMEIP_PATCH_VERSION@.apexai"
+#else
+#define VSOMEIP_VERSION "@VSOMEIP_MAJOR_VERSION@.@VSOMEIP_MINOR_VERSION@.@VSOMEIP_PATCH_VERSION@.@VSOMEIP_HOTFIX_VERSION@.apexai"
+#endif
+#endif
+
 #define VSOMEIP_ENV_APPLICATION_NAME            "VSOMEIP_APPLICATION_NAME"
 #define VSOMEIP_ENV_CONFIGURATION               "VSOMEIP_CONFIGURATION"
 #define VSOMEIP_ENV_CONFIGURATION_MODULE        "VSOMEIP_CONFIGURATION_MODULE"
@@ -112,7 +120,7 @@
 #define VSOMEIP_MINIMUM_CHECK_TTL_TIMEOUT       100
 #define VSOMEIP_SETSOCKOPT_TIMEOUT_US           500000  // microseconds
 
-#if defined(__linux__) || defined(ANDROID)
+#if defined(__linux__) || defined(ANDROID) || defined(__QNX__)
 #include <pthread.h>
 #endif
 
