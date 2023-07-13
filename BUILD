@@ -2,6 +2,7 @@ cc_shared_library(
     name = "vsomeip3_shared",
     shared_lib_name = "libvsomeip3.so",
     tags = ["same-ros-pkg-as: vsomeip3"],
+    # Disabled due to linking problem when used as an external repository with sanitizers enabled.
     #user_link_flags = [
     #    "-Wl,--no-undefined",
     #],
@@ -17,6 +18,7 @@ cc_shared_library(
     ],
     shared_lib_name = "libvsomeip3-cfg.so.3",
     tags = ["same-ros-pkg-as: vsomeip3"],
+    # Disabled due to linking problem when used as an external repository with sanitizers enabled.
     #user_link_flags = [
     #    "-Wl,--no-undefined",
     #],
@@ -32,6 +34,7 @@ cc_shared_library(
     ],
     shared_lib_name = "libvsomeip3-sd.so.3",
     tags = ["same-ros-pkg-as: vsomeip3"],
+    # Disabled due to linking problem when used as an external repository with sanitizers enabled.
     #user_link_flags = [
     #    "-Wl,--no-undefined",
     #],
