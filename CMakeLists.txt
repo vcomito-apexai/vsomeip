@@ -237,7 +237,15 @@ if (MSVC)
     link_directories(${Boost_LIBRARY_DIR_DEBUG})
     ADD_DEFINITIONS( -DBOOST_ALL_DYN_LINK )
 else()
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OS_CXX_FLAGS} -g ${OPTIMIZE} -std=c++14 ${NO_DEPRECATED} ${EXPORTSYMBOLS}")
+    ################################################################################
+    # Apex.AI additions
+    ################################################################################
+    if (CMAKE_BUILD_TYPE STREQUAL "Release")
+      # Remove -g flag on Release builds, to remove debug_symbols
+      set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OS_CXX_FLAGS} ${OPTIMIZE} -std=c++14 ${NO_DEPRECATED} ${EXPORTSYMBOLS}")
+    else()
+      set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OS_CXX_FLAGS} -g ${OPTIMIZE} -std=c++14 ${NO_DEPRECATED} ${EXPORTSYMBOLS}")
+    endif()
     set(USE_RT "rt")
 endif()
 
