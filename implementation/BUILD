@@ -96,6 +96,7 @@ cc_library(
             "*/include/**/*.hpp",
         ],
     ),
+    copts = ["-Wno-error"],
     defines = [
         "WITHOUT_SYSTEMD",
         "VSOMEIP_DISABLE_SECURITY",
