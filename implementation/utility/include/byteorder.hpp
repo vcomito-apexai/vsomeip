@@ -10,6 +10,8 @@
 #include <endian.h>
 #elif defined(__freebsd__)
 #include <sys/endian.h>
+#elif defined(__QNX__)
+#include <sys/types.h>
 #else
 // TEST IF THERE COULD BE AN ERROR!
 //#error "Undefined OS (only Linux/FreeBSD are currently supported)"
